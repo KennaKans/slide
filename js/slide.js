@@ -112,6 +112,7 @@ export default class Slide {
   }
 
   init() {
+    this.transition(true);
     this.bindEvents();
     this.addSlideEvents();
     this.slidesConfig();
