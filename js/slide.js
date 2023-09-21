@@ -1,6 +1,6 @@
 import debounce from "./debounce.js";
 
-export default class Slide {
+export class Slide {
   constructor(slide, wrapper) {
     this.slide = document.querySelector(slide);
     this.wrapper = document.querySelector(wrapper);
@@ -32,7 +32,6 @@ export default class Slide {
       this.dist.startX = event.changedTouches[0].clientX;
       movetype = "touchmove";
     }
-    this.dist.startX = event.clientX;
     this.wrapper.addEventListener(movetype, this.onMove);
     this.transition(false);
   }
@@ -48,7 +47,7 @@ export default class Slide {
 
   onEnd(event) {
     const movetype = event.type === "mouseup" ? "mousemove" : "touchmove";
-    this.wrapper.removeEventListener("mousemove", this.onMove);
+    this.wrapper.removeEventListener(movetype, this.onMove);
     this.dist.finalPosition = this.dist.movePosition;
     this.transition(true);
     this.changeSlideOnEnd();
@@ -71,7 +70,8 @@ export default class Slide {
     this.wrapper.addEventListener("touchend", this.onEnd);
   }
 
-  //slides config
+  // Slides config
+
   slidePosition(slide) {
     const margin = (this.wrapper.offsetWidth - slide.offsetWidth) / 2;
     return -(slide.offsetLeft - margin);
@@ -131,15 +131,33 @@ export default class Slide {
     this.onStart = this.onStart.bind(this);
     this.onMove = this.onMove.bind(this);
     this.onEnd = this.onEnd.bind(this);
+
+    this.activePrevSlide = this.activePrevSlide.bind(this);
+    this.activeNextSlide = this.activeNextSlide.bind(this);
+
     this.onResize = debounce(this.onResize.bind(this), 200);
   }
 
   init() {
-    this.transition(true);
     this.bindEvents();
+    this.transition(true);
     this.addSlideEvents();
     this.slidesConfig();
     this.addResizeEvent();
+    this.changeSlide(0);
     return this;
+  }
+}
+
+export class SlideNav extends Slide {
+  addArrow(prev, next) {
+    this.prevElement = document.querySelector(prev);
+    this.nextElement = document.querySelector(next);
+    this.addArrowEvent();
+  }
+
+  addArrowEvent() {
+    this.prevElement.addEventListener("click", this.activePrevSlide);
+    this.nextElement.addEventListener("click", this.activeNextSlide);
   }
 }
